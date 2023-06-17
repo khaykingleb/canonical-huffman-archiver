@@ -1,0 +1,32 @@
+[tool.poetry]
+name = "canonical-huffman-archiver"
+version = "0.0.0"
+description = "Canonical huffman archiver"
+authors = ["Gleb Khaykin <khaykingleb@gmail.com>"]
+license = "MIT"
+readme = "README.md"
+
+[tool.poetry.dependencies]
+python = ">3.10,<3.12"
+conan = "^2.0.6"
+
+[tool.poetry.group.dev.dependencies]
+commitizen = "^2.37.0"
+pre-commit = "^2.20.0"
+detect-secrets = "^1.4.0"
+
+[tool.semantic_release]
+version_variable = [
+  "pyproject.toml:version",
+]
+version_pattern = [
+  "Makefile:^VERSION := {version}"
+]
+branch = "main"
+upload_to_pypi = false
+upload_to_release = false
+commit_subject = "chore(release): v{version} [skip ci]"
+
+[build-system]
+requires = ["poetry-core"]
+build-backend = "poetry.core.masonry.api"
