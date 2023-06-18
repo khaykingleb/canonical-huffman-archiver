@@ -49,6 +49,8 @@ jobs:
             python-version: ${{ inputs.python-version }}
         - name: Checkout code so that it is available to use in the executing runner
           uses: actions/checkout@v3.5.0
+        - name: Install poetry and conan
+          run: pip install --no-cache-dir poetry==1.5.1 && poetry install --only main
         - name: Create a compilation database for clang-tidy
           run: make build
         - name: Check all files with pre-commit and update globally available pre-commit cache
