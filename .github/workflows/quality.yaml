@@ -49,6 +49,8 @@ jobs:
             python-version: ${{ inputs.python-version }}
         - name: Checkout code so that it is available to use in the executing runner
           uses: actions/checkout@v3.5.0
+        - name: Create a compilation database for clang-tidy
+          run: cmake -S . -B build -DCMAKE_EXPORT_COMPILE_COMMANDS=ON
         - name: Check all files with pre-commit and update globally available pre-commit cache
           uses: pre-commit/action@v3.0.0
           env:
