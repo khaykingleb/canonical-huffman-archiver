@@ -1,14 +1,13 @@
 cmake_minimum_required(VERSION 3.15)
-project(Huffman Archiver)
+project(archiver)
+message("Building ${PROJECT_NAME} with CMake version: ${CMAKE_VERSION}")
 
-message("Building with CMake version: ${CMAKE_VERSION}")
+# set(CMAKE_CXX_STANDARD 20)
+# set(CMAKE_CXX_STANDARD_REQUIRED True)
+# set(CMAKE_CXX_FLAGS "-Wall -Werror -stdlib=libc++")
 
-set(CMAKE_CXX_STANDARD 20)
-set(CMAKE_CXX_STANDARD_REQUIRED True)
-set(CMAKE_CXX_FLAGS "-Wall -Werror -stdlib=libc++")
-
+find_package(Boost REQUIRED)
 find_package(GTest REQUIRED)
 
-enable_testing()
-include(GoogleTest)
-include(CTest)
+add_executable(${PROJECT_NAME} src/main.cc)
+target_link_libraries(${PROJECT_NAME} boost::boost gtest::gtest)
