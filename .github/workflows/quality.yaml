@@ -41,7 +41,7 @@ jobs:
     pre-commit:
       runs-on: ubuntu-latest
       name: Check all files with pre-commit
-      timeout-minutes: 5
+      timeout-minutes: 30
       steps:
         - name: Install Python on the runner
           uses: actions/setup-python@v4.5.0
@@ -50,7 +50,7 @@ jobs:
         - name: Checkout code so that it is available to use in the executing runner
           uses: actions/checkout@v3.5.0
         - name: Create a compilation database for clang-tidy
-          run: cmake -S . -B build -DCMAKE_EXPORT_COMPILE_COMMANDS=ON
+          run: make build
         - name: Check all files with pre-commit and update globally available pre-commit cache
           uses: pre-commit/action@v3.0.0
           env:
