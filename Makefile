@@ -40,7 +40,7 @@ build:  ## Build project
 	cmake .. \
 		-DCMAKE_TOOLCHAIN_FILE=Release/generators/conan_toolchain.cmake \
 		-DCMAKE_BUILD_TYPE=Release \
-		-DCMAKE_EXPORT_COMPILE_COMMANDS=1
+		-DCMAKE_EXPORT_COMPILE_COMMANDS=ON
 	cmake --build .
 	source Release/generators/deactivate_conanbuild.sh
 .PHONY: build
