@@ -9,7 +9,6 @@ UNAME := $(shell uname -s)
 repo-prerequisites:  ## Install prerequisites
 ifeq ($(UNAME), Darwin)
 	brew install llvm
-	brew install clang-format
 endif
 .PHONY: repo-prerequisites
 
