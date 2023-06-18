@@ -1,3 +1,6 @@
 BasedOnStyle: Google
 IndentWidth: 4
 ColumnLimit: 100
+AllowAllArgumentsOnNextLine: true
+BinPackArguments: false
+BinPackParameters: false
