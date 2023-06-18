@@ -17,6 +17,7 @@ ifeq ($(UNAME), Darwin)
 	brew install llvm
 	brew install clang-format
 endif
+.PHONY: repo-prerequisites
 
 repo-deps:  ## Install repo deps
 	pip install poetry
