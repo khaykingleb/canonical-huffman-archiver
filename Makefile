@@ -1,5 +1,6 @@
 VERSION := 0.0.0
 SHELL := /bin/bash
+UNAME := $(shell uname -s)
 
 ##==================================================================================================
 ##@ Helper
@@ -10,6 +11,12 @@ help:  ## Display help
 
 ##==================================================================================================
 ##@ Repo initialization
+
+repo-prerequisites:  ## Install prerequisites
+ifeq ($(UNAME), Darwin)
+	brew install llvm
+	brew install clang-format
+endif
 
 repo-deps:  ## Install repo deps
 	pip install poetry
@@ -22,7 +29,7 @@ repo-pre-commit:  ## Install pre-commit
 	poetry run pre-commit install -t commit-msg
 .PHONY: repo-pre-commit
 
-repo-init: repo-deps repo-pre-commit  ## Initialize repo by executing above commands
+repo-init: repo-prerequisites repo-deps repo-pre-commit  ## Initialize repo by executing above commands
 .PHONY: repo-init
 
 ##==================================================================================================
