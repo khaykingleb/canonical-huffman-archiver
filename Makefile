@@ -1,13 +1,7 @@
 VERSION := 0.0.0
 SHELL := /bin/bash
 UNAME := $(shell uname -s)
-
-##==================================================================================================
-##@ Helper
-
-help:  ## Display help
-	@awk 'BEGIN {FS = ":.*##"; printf "\nUsage: \033[36m\033[0m\n"} /^[a-zA-Z\.\%-]+:.*?##/ { printf "  \033[36m%-24s\033[0m %s\n", $$1, $$2 } /^##@/ { printf "\n\033[1m%s\033[0m\n", substr($$0, 5) } ' $(MAKEFILE_LIST)
-.PHONY: help
+.DEFAULT_GOAL = help
 
 ##==================================================================================================
 ##@ Repo initialization
@@ -87,3 +81,11 @@ audit-secrets-baseline:  ## Check updated .secrets.baseline file
 	poetry run detect-secrets audit .secrets.baseline
 	git commit .secrets.baseline --no-verify -m "build(security): update secrets.baseline"
 .PHONY: audit-secrets-baseline
+
+
+##==================================================================================================
+##@ Helper
+
+help:  ## Display help
+	@awk 'BEGIN {FS = ":.*##"; printf "\nUsage: \033[36m\033[0m\n"} /^[a-zA-Z\.\%-]+:.*?##/ { printf "  \033[36m%-24s\033[0m %s\n", $$1, $$2 } /^##@/ { printf "\n\033[1m%s\033[0m\n", substr($$0, 5) } ' $(MAKEFILE_LIST)
+.PHONY: help
