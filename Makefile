@@ -38,7 +38,10 @@ repo-init: repo-prerequisites repo-deps repo-pre-commit  ## Initialize repo by e
 
 .ONESHELL:
 build:  ## Build project
-	conan install . --build=missing --profile=conanprofile.txt
+	poetry run conan install . \
+		--build=missing \
+		--profile=conanprofile.txt \
+		--settings=compiler.cppstd=gnu20
 	cd build
 	source Release/generators/conanbuild.sh
 	cmake .. \
@@ -65,15 +68,15 @@ clean: ## Delete junk files
 ##@ Miscellaneous
 
 conan-profile:  ## Guess a configuration set (compiler, build configuration, architecture, shared or static libraries, etc.)
-	conan profile detect --force
+	poetry run conan profile detect --force
 .PHONY: conan-profile
 
 conan-lock:  ## Lock dependencies
-	conan lock create .
+	poetry run conan lock create .
 .PHONY: conan-lock
 
 update-pre-commit-hooks:  ## Update pre-commit hooks
-	pre-commit autoupdate
+	poetry run pre-commit autoupdate
 .PHONY: update-pre-commit-hooks
 
 create-secrets-baseline:  ## Create secrets baseline file
