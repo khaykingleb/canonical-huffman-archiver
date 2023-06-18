@@ -68,7 +68,7 @@ clean: ## Delete junk files
 ##@ Miscellaneous
 
 conan-profile:  ## Guess a configuration set (compiler, build configuration, architecture, shared or static libraries, etc.)
-	poetry run conan profile detect --force
+	poetry run conan profile detect --force | grep -v "Detected profile:" > conanprofile.txt
 .PHONY: conan-profile
 
 conan-lock:  ## Lock dependencies
