@@ -1,0 +1,50 @@
+name: Release
+
+on:
+  push:
+    branches:
+      - master
+
+  workflow_call:
+    inputs:
+      node-version:
+        default: '16.15.1'
+        description: Node runtime version
+        required: false
+        type: string
+      python-version:
+        default: '3.11'
+        description: Python runtime version
+        required: false
+        type: string
+
+jobs:
+    quality:
+        uses: .github/workflows/pre-commit.yaml@master
+        with:
+          python-version: ${{ inputs.python-version }}
+          node-version: ${{ inputs.node-version }}
+
+    release:
+        needs:
+          - quality
+        runs-on: ubuntu-latest
+        name: Run semantic release
+        steps:
+          - name: Install Python on the runner
+            uses: actions/setup-python@v4.5.0
+            with:
+                python-version: ${{ inputs.python-version }}
+          - name: Checkout code so that it is available to use in the executing runner
+            uses: actions/checkout@v3.5.0
+            with:
+              fetch-depth: 0
+              token: ${{ secrets.PAT_GITHUB }}
+          - name: Run semantic release
+            env:
+             GH_TOKEN: ${{ secrets.PAT_GITHUB }}
+            run: |
+                pip install poetry python-semantic-release==7.34.6
+                git config --global user.name "github-actions"
+                git config --global user.email "action@github.com"
+                semantic-release publish -v DEBUG -D commit_author="github-actions <action@github.com>"

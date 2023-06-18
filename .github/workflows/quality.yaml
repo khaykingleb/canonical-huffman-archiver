@@ -1,0 +1,55 @@
+name: Code Quality
+
+on:
+  pull_request:
+    branches:
+      - master
+
+  workflow_call:
+    inputs:
+      node-version:
+        default: '16.15.1'
+        description: Node runtime version
+        required: false
+        type: string
+      python-version:
+        default: '3.11'
+        description: Python runtime version
+        required: false
+        type: string
+
+jobs:
+    commitlint:
+      runs-on: ubuntu-latest
+      name: Check PR commit messages with commitlint
+      timeout-minutes: 5
+      steps:
+        - name: Set up Node ${{ inputs.node-version }}
+          uses: actions/setup-node@v3.6.0
+          with:
+            node-version: ${{ inputs.node-version }}
+        - name: Checkout code so that it is available to use in the executing runner
+          uses: actions/checkout@v3.5.0
+          with:
+            fetch-depth: 0
+        - run: npm install commitlint-plugin-function-rules --legacy-peer-deps
+        - name: Check all commits to be in accordance with the conventional commit style
+          uses: wagoid/commitlint-github-action@v5.3.1
+          env:
+            NODE_PATH: ${{ github.workspace }}/node_modules
+
+    pre-commit:
+      runs-on: ubuntu-latest
+      name: Check all files with pre-commit
+      timeout-minutes: 5
+      steps:
+        - name: Install Python on the runner
+          uses: actions/setup-python@v4.5.0
+          with:
+            python-version: ${{ inputs.python-version }}
+        - name: Checkout code so that it is available to use in the executing runner
+          uses: actions/checkout@v3.5.0
+        - name: Check all files with pre-commit and update globally available pre-commit cache
+          uses: pre-commit/action@v3.0.0
+          env:
+            SKIP: no-commit-to-branch
