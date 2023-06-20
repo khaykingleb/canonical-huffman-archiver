@@ -20,7 +20,7 @@ on:
 
 jobs:
     quality:
-        uses: khaykingleb/Canonical-Huffman-Archiver/.github/workflows/quality.yaml@master
+        uses: ./.github/workflows/quality.yaml
         with:
           python-version: ${{ inputs.python-version }}
           node-version: ${{ inputs.node-version }}
