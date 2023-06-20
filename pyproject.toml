@@ -1,6 +1,6 @@
 [tool.poetry]
 name = "canonical-huffman-archiver"
-version = "0.0.0"
+version = "0.1.0"
 description = "Canonical huffman archiver"
 authors = ["Gleb Khaykin <khaykingleb@gmail.com>"]
 license = "MIT"

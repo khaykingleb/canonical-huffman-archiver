@@ -1,4 +1,4 @@
-VERSION := 0.0.0
+VERSION := 0.1.0
 SHELL := /bin/bash
 UNAME := $(shell uname -s)
 .DEFAULT_GOAL = help
