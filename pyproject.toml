@@ -22,7 +22,7 @@ version_variable = [
 version_pattern = [
   "Makefile:^VERSION := {version}"
 ]
-branch = "main"
+branch = "master"
 upload_to_pypi = false
 upload_to_release = false
 commit_subject = "chore(release): v{version} [skip ci]"
