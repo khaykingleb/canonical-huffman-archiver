@@ -5,25 +5,12 @@ on:
     branches:
       - master
 
-  workflow_call:
-    inputs:
-      node-version:
-        default: '16.15.1'
-        description: Node runtime version
-        required: false
-        type: string
-      python-version:
-        default: '3.11'
-        description: Python runtime version
-        required: false
-        type: string
-
 jobs:
     quality:
-        uses: ./.github/workflows/quality.yaml
+        uses: ./.github/workflows/quality.yaml@master
         with:
-          python-version: ${{ inputs.python-version }}
-          node-version: ${{ inputs.node-version }}
+          python-version: "16.15.1"
+          node-version: "3.11"
 
     release:
         runs-on: ubuntu-latest
