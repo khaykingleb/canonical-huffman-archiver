@@ -12,7 +12,7 @@ int main(int argc, char *argv[]) {
     po::options_description desc("Allowed options");
     desc.add_options()                                                                     //
         ("help,h", "Print usage message")                                                  //
-        ("compress,e", po::value<Arguments>()->multitoken(), "Compress files to archive")  //
+        ("compress,c", po::value<Arguments>()->multitoken(), "Compress files to archive")  //
         ("decompress,d", po::value<std::string>(), "Decompress archive");
 
     po::variables_map vm;
