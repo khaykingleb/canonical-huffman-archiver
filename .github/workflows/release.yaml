@@ -9,8 +9,8 @@ jobs:
     quality:
         uses: ./.github/workflows/quality.yaml
         with:
-          python-version: "16.15.1"
-          node-version: "3.9"
+          node-version: "16.15.1"
+          python-version: "3.11"
 
     release:
         runs-on: ubuntu-latest
