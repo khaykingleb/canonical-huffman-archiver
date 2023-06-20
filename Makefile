@@ -82,7 +82,6 @@ audit-secrets-baseline:  ## Check updated .secrets.baseline file
 	git commit .secrets.baseline --no-verify -m "build(security): update secrets.baseline"
 .PHONY: audit-secrets-baseline
 
-
 ##==================================================================================================
 ##@ Helper
 
