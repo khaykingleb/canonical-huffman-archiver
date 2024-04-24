@@ -7,12 +7,6 @@ BUILD_TYPE ?= Release
 ##==================================================================================================
 ##@ Repo initialization
 
-prerequisites:  ## Install prerequisites
-ifeq ($(UNAME), Darwin)
-	brew install llvm
-endif
-.PHONY: prerequisites
-
 deps:  ## Install repo deps
 	pip3 install poetry
 	poetry install
@@ -23,7 +17,7 @@ pre-commit:  ## Install pre-commit
 	poetry run pre-commit install -t commit-msg
 .PHONY: pre-commit
 
-init: prerequisites deps pre-commit  ## Initialize repo by executing above commands
+init: deps pre-commit  ## Initialize repo by executing above commands
 .PHONY: init
 
 ##==================================================================================================
