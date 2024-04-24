@@ -7,8 +7,13 @@ BUILD_TYPE ?= Release
 ##==================================================================================================
 ##@ Repo initialization
 
+prerequisites:  ## Install repo prerequisites
+ifeq ($(UNAME),Darwin)
+	brew install llvm@17
+endif
+.PHONY: prerequisites
+
 deps:  ## Install repo deps
-	pip3 install poetry
 	poetry install
 .PHONY: deps
 
@@ -17,7 +22,7 @@ pre-commit:  ## Install pre-commit
 	poetry run pre-commit install -t commit-msg
 .PHONY: pre-commit
 
-init: deps pre-commit  ## Initialize repo by executing above commands
+init: prerequisites deps pre-commit  ## Initialize repo by executing above commands
 .PHONY: init
 
 ##==================================================================================================
@@ -27,7 +32,7 @@ build:  ## Build project
 	poetry run conan install . \
 		--build=missing \
 		--profile=conanprofile.txt \
-		--settings=compiler.cppstd=gnu20 \
+		--settings=compiler.cppstd=gnu23 \
 		--settings=build_type=$(BUILD_TYPE) \
 	&& cd build \
 	&& cmake .. \
