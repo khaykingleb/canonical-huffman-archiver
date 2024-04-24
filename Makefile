@@ -1,48 +1,46 @@
 VERSION := 0.1.0
 SHELL := /bin/bash
 UNAME := $(shell uname -s)
+BUILD_TYPE ?= Release
 .DEFAULT_GOAL = help
 
 ##==================================================================================================
 ##@ Repo initialization
 
-repo-prerequisites:  ## Install prerequisites
+prerequisites:  ## Install prerequisites
 ifeq ($(UNAME), Darwin)
 	brew install llvm
 endif
-.PHONY: repo-prerequisites
+.PHONY: prerequisites
 
-repo-deps:  ## Install repo deps
-	pip install poetry
-	poetry config virtualenvs.in-project true
+deps:  ## Install repo deps
+	pip3 install poetry
 	poetry install
-.PHONY: repo-deps
+.PHONY: deps
 
-repo-pre-commit:  ## Install pre-commit
+pre-commit:  ## Install pre-commit
 	poetry run pre-commit install
 	poetry run pre-commit install -t commit-msg
-.PHONY: repo-pre-commit
+.PHONY: pre-commit
 
-repo-init: repo-prerequisites repo-deps repo-pre-commit  ## Initialize repo by executing above commands
-.PHONY: repo-init
+init: prerequisites deps pre-commit  ## Initialize repo by executing above commands
+.PHONY: init
 
 ##==================================================================================================
 ##@ Building with CMake
 
-.ONESHELL:
 build:  ## Build project
 	poetry run conan install . \
 		--build=missing \
 		--profile=conanprofile.txt \
-		--settings=compiler.cppstd=gnu20
-	cd build
-	source Release/generators/conanbuild.sh
-	cmake .. \
-		-DCMAKE_TOOLCHAIN_FILE=Release/generators/conan_toolchain.cmake \
-		-DCMAKE_BUILD_TYPE=Release \
-		-DCMAKE_EXPORT_COMPILE_COMMANDS=ON
-	cmake --build .
-	source Release/generators/deactivate_conanbuild.sh
+		--settings=compiler.cppstd=gnu20 \
+		--settings=build_type=$(BUILD_TYPE) \
+	&& cd build \
+	&& cmake .. \
+		-DCMAKE_TOOLCHAIN_FILE=$(BUILD_TYPE)/generators/conan_toolchain.cmake \
+		-DCMAKE_BUILD_TYPE=$(BUILD_TYPE) \
+		-DCMAKE_EXPORT_COMPILE_COMMANDS=ON \
+	&& cmake --build .
 .PHONY: build
 
 tests:  ## Run tests
@@ -55,6 +53,7 @@ tests:  ## Run tests
 clean: ## Delete junk files
 	find . | grep -E "\.o" | xargs rm -rf
 	find . | grep -E "\.exe" | xargs rm -rf
+	rm -rf build
 .PHONY: clean
 
 ##==================================================================================================
@@ -65,7 +64,7 @@ conan-profile:  ## Guess a configuration set (compiler, build configuration, arc
 	perl -pi -e 'chomp if eof' conanprofile.txt
 .PHONY: conan-profile
 
-conan-lock:  ## Lock dependencies
+conan-lock:  ## Lock C++ dependencies
 	poetry run conan lock create .
 .PHONY: conan-lock
 
