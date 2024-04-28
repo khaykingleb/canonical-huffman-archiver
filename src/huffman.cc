@@ -28,7 +28,7 @@ void HuffmanCoder::BuildCanonicalCodes()
     MoveHuffmanCodesToCanonicalForm();
 }
 
-std::unordered_map<uint16_t, std::string> HuffmanCoder::GetCodes() const
+HuffmanCodes HuffmanCoder::GetCodes() const
 {
     return codes_;
 }
@@ -103,7 +103,7 @@ void HuffmanCoder::GenerateHuffmanCodes(const std::shared_ptr<Node>& node, const
 
     if (node->left == nullptr && node->right == nullptr)
     {
-        codes_[node->character] = code;
+        codes_.insert({ node->character, code });
         return;
     }
 
@@ -135,7 +135,7 @@ void HuffmanCoder::MoveHuffmanCodesToCanonicalForm()
         {
             auto canonical_code = std::bitset<16>(current_code).to_string();
             auto trimmed_canonical_code = canonical_code.substr(16 - code_bit_length);
-            codes_[character] = trimmed_canonical_code;
+            codes_.insert({ character, trimmed_canonical_code });
 
             current_code++;
         }

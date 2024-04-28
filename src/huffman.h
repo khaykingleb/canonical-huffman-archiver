@@ -1,6 +1,8 @@
 #include "filereader.h"
 #include "filewriter.h"
+
 #include <memory>
+#include <set>
 #include <string>
 #include <unordered_map>
 
@@ -31,6 +33,23 @@ struct NodeCompare
     }
 };
 
+// Comparator for sorting the codes
+struct CodeCompare
+{
+    bool operator()(const std::pair<uint16_t, std::string>& lhs,
+                    const std::pair<uint16_t, std::string>& rhs) const
+    {
+        // Compare lexicographically if the lengths are equal
+        if (lhs.second.size() == rhs.second.size())
+        {
+            return lhs.first < rhs.first;
+        }
+        // Otherwise, compare by the length of the code
+        return lhs.second.size() < rhs.second.size();
+    }
+};
+
+using HuffmanCodes = std::set<std::pair<uint16_t, std::string>, CodeCompare>;
 
 class HuffmanCoder
 {
@@ -39,7 +58,7 @@ public:
     HuffmanCoder(FileWriter& writer, FileReader& reader);
 
     void BuildCanonicalCodes();
-    std::unordered_map<uint16_t, std::string> GetCodes() const;
+    HuffmanCodes GetCodes() const;
     void Encode();
 
 protected:
@@ -53,5 +72,6 @@ private:
     FileWriter& writer_;
     FileReader& reader_;
 
-    std::unordered_map<uint16_t, std::string> codes_;
+    // std::unordered_map<uint16_t, std::string> codes_;
+    HuffmanCodes codes_;
 };
