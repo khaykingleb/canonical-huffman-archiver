@@ -1,3 +1,4 @@
+#include "archiver.h"
 #include <boost/program_options.hpp>
 #include <fstream>
 #include <iostream>
@@ -30,6 +31,9 @@ int main(int argc, char* argv[])
         Arguments input = vm["compress"].as<Arguments>();
         std::string archive_path = input.at(0);
         Arguments file_paths = Arguments(input.begin() + 1, input.end());
+
+        Archiver archiver(archive_path, file_paths);
+        archiver.Compress();
     }
     else if (vm.count("decompress"))
     {
