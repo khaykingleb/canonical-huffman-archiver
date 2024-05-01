@@ -27,3 +27,4 @@ function(add_gtest testname)
 endfunction()
 
 add_gtest(test_file)
+add_gtest(test_huffman)
