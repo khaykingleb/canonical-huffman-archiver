@@ -58,11 +58,6 @@ using HuffmanCodes = std::map<HuffmanKey, std::string, HuffmanKeyCompare>;
 using HuffmanCodesForLookup = std::unordered_map<uint16_t, std::string>;
 
 /*
- * Move the Huffman codes to canonical form.
- */
-std::tuple<HuffmanCodes, HuffmanCodesForLookup> MoveCodesToCanonicalForm(HuffmanCodes codes);
-
-/*
  * Class to encode the file using Huffman coding algorithm.
  */
 class HuffmanCoder
@@ -78,13 +73,13 @@ public:
     /*
      * Encode the file using Huffman coding algorithm.
      */
-    void Encode();
+    void Encode() const;
 
 protected:
     /*
      * Build the canonical Huffman codes.
      */
-    HuffmanCodes BuildCodes();
+    HuffmanCodes BuildCodes() const;
 
     /*
      * Get the character frequencies from the file.
@@ -98,7 +93,7 @@ protected:
      * @param character_frequencies The character frequencies.
      * @return The root of the Huffman binary trie.
      */
-    std::shared_ptr<Node> BuildTrie(const CharacterFrequencies& character_frequencies) const;
+    std::shared_ptr<Node> GetTrie(const CharacterFrequencies& character_frequencies) const;
 
     /*
      * Generate the Huffman codes.
@@ -107,9 +102,14 @@ protected:
      */
     void GenerateHuffmanCodes(const std::shared_ptr<Node>& node,
                               const std::string& code,
-                              HuffmanCodes& codes);
+                              HuffmanCodes& codes) const;
 
 private:
     FileReader& reader_;
     FileWriter& writer_;
 };
+
+/*
+ * Move the Huffman codes to canonical form.
+ */
+std::tuple<HuffmanCodes, HuffmanCodesForLookup> MoveCodesToCanonicalForm(HuffmanCodes codes);
