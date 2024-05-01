@@ -1,36 +1,51 @@
 #pragma once
 
+#include <cstddef>
+#include <cstdint>
 #include <fstream>
 
+/**
+ * A class for writing to a file bit by bit.
+ */
 class FileWriter
 {
 public:
+    /**
+     * Constructor.
+     * @param archive_path The path to the file to write to.
+     */
     explicit FileWriter(const std::string& archive_path);
+
+    /**
+     * Destructor.
+     */
     ~FileWriter();
 
-    // FileWriter(const FileWriter& file_writer) = delete;
-    // FileWriter& operator=(const FileWriter& file_writer) = delete;
-    // FileWriter(FileWriter&& file_writer) = default;
-    // FileWriter& operator=(FileWriter&& file_writer) = default
-
-    void WriteBits(unsigned char c, size_t bits_count);
-
-    // void WriteByte(unsigned char byte);
-    // void WriteBit(bool bit);
+    /**
+     * Write an integer encoded with variable-length bit encoding.
+     * @param number The integer to write.
+     * @param num_bits The number of bits to write.
+     */
+    void WriteHuffmanInt(uint64_t number, size_t num_bits = 9);
 
 protected:
-    void Flush();
+    /**
+     * Write a bit to the file.
+     * @param bit The bit to write.
+     */
+    void WriteBits(const std::vector<bool>& bits);
+
+    /**
+     * Flush the byte buffer to the file.
+     */
+    void FlushBuffer();
 
 private:
     std::string archive_path_;
     std::ofstream file_;
 
     unsigned char buffer_byte_ { 0 };
-    uint8_t bits_pos_ { 0 };
+    size_t bit_pos_ { 0 };
 
     size_t file_size_ { 0 };
-
-    // std::bitset<8> _buffer;
-    // size_t file_size_ { 0 };
-    // size_t bytes_written_ { 0 };
 };

@@ -1,5 +1,8 @@
-
 #include "filewriter.h"
+
+#include <cstddef>
+#include <cstdint>
+#include <vector>
 
 FileWriter::FileWriter(const std::string& archive_path)
     : archive_path_(archive_path)
@@ -16,28 +19,53 @@ FileWriter::~FileWriter()
 {
     if (file_.is_open())
     {
+        FlushBuffer();
         file_.close();
     }
 }
 
-void FileWriter::Flush()
+void FileWriter::WriteHuffmanInt(uint64_t number, size_t num_bits)
 {
-    file_.put(buffer_byte_); // возможно нужно использовать кастование к char
+    std::vector<bool> bits(num_bits);
+    for (size_t i = 0; i < num_bits; ++i)
+    {
+        // Fill from the most significant bit to the least significant bit
+        bits[num_bits - 1 - i] = (number >> i) & 1;
+    }
+
+    WriteBits(bits);
 }
 
-void FileWriter::WriteBits(unsigned char c, size_t bits_count)
+void FileWriter::WriteBits(const std::vector<bool>& bits)
 {
-    for (size_t i = 0; i < bits_count; ++i)
+    for (bool bit : bits)
     {
-        buffer_byte_ |= (c & 1) << bits_pos_;
-        c >>= 1;
-        ++bits_pos_;
-
-        if (bits_pos_ == 8)
+        // Add bit to buffer
+        if (bit)
         {
-            Flush();
-            buffer_byte_ = 0;
-            bits_pos_ = 0;
+            // Set specific bit in the buffer byte without altering other bits that are already set
+            buffer_byte_ |= (1 << (7 - bit_pos_));
         }
+
+        ++bit_pos_;
+
+        // If buffer is full, write it out to the file
+        if (bit_pos_ == 8)
+        {
+            FlushBuffer();
+        }
+    }
+}
+
+void FileWriter::FlushBuffer()
+{
+    if (bit_pos_ > 0)
+    {
+        file_.put(static_cast<char>(buffer_byte_));
+
+        buffer_byte_ = 0;
+        bit_pos_ = 0;
+
+        ++file_size_;
     }
 }

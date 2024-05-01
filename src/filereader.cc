@@ -1,6 +1,10 @@
 #include "filereader.h"
+
+#include <cstddef>
+#include <cstdint>
 #include <filesystem>
 #include <iostream>
+#include <sys/types.h>
 
 FileReader::FileReader(const std::string& file_path)
     : file_path_(file_path)
@@ -27,6 +31,15 @@ FileReader::~FileReader()
     }
 }
 
+void FileReader::ResetPositionToStart()
+{
+    file_.clear();
+    file_.seekg(0, std::ios::beg);
+
+    buffer_byte_ = 0;
+    bit_pos_ = 0;
+}
+
 bool FileReader::HasMoreCharacters() const
 {
     return !file_.eof();
@@ -39,7 +52,6 @@ std::optional<unsigned char> FileReader::ReadCharacter()
     {
         return static_cast<unsigned char>(character);
     }
-
     return std::nullopt;
 }
 
@@ -48,39 +60,37 @@ std::string FileReader::GetFileName() const
     return std::filesystem::path(file_path_).filename().string();
 }
 
-std::vector<bool> FileReader::ReadBits(size_t bits_count)
+uint64_t FileReader::ReadHuffmanInt(size_t num_bits)
 {
-    std::vector<bool> bits;
-    for (size_t i = 0; i < bits_count; ++i)
+    uint64_t number = 0;
+
+    for (size_t i = 0; i < num_bits; ++i)
     {
-        if (file_.eof())
-        {
-            break;
-        }
-
-        bits.emplace_back(buffer_byte_ & (1 << bits_pos_));
-        ++bits_pos_;
-
-        if (bits_pos_ == 8)
-        {
-            char character;
-            file_.read(&character, 1);
-            buffer_byte_ = static_cast<unsigned char>(character);
-        }
+        bool bit = ReadBit();
+        number |= static_cast<uint64_t>(bit) << (num_bits - 1 - i);
     }
 
-    return bits;
+    return number;
 }
 
-uint64_t FileReader::ReadHuffmanInt(size_t bits_count)
+bool FileReader::ReadBit()
 {
-    auto bits = ReadBits(bits_count);
-
-    uint64_t value = 0;
-    for (size_t i = 0; i < bits.size(); ++i)
+    // If the buffer is empty, read the next byte
+    if (bit_pos_ == 0)
     {
-        value |= bits[i] << i;
+        char byte;
+        if (!file_.get(byte))
+        {
+            throw std::runtime_error("Failed to read a byte from the file");
+        }
+
+        buffer_byte_ = byte;
     }
 
-    return value;
+    bool bit = buffer_byte_ & (1 << (7 - bit_pos_));
+
+    ++bit_pos_;
+    bit_pos_ %= 8;
+
+    return bit;
 }
