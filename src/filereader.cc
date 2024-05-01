@@ -63,13 +63,11 @@ std::string FileReader::GetFileName() const
 uint64_t FileReader::ReadHuffmanInt(size_t num_bits)
 {
     uint64_t number = 0;
-
     for (size_t i = 0; i < num_bits; ++i)
     {
         bool bit = ReadBit();
         number |= static_cast<uint64_t>(bit) << (num_bits - 1 - i);
     }
-
     return number;
 }
 
