@@ -31,6 +31,11 @@ FileReader::~FileReader()
     }
 }
 
+std::string FileReader::GetFileName() const
+{
+    return std::filesystem::path(file_path_).filename().string();
+}
+
 void FileReader::ResetPositionToStart()
 {
     file_.clear();
@@ -53,11 +58,6 @@ std::optional<unsigned char> FileReader::ReadCharacter()
         return static_cast<unsigned char>(character);
     }
     return std::nullopt;
-}
-
-std::string FileReader::GetFileName() const
-{
-    return std::filesystem::path(file_path_).filename().string();
 }
 
 uint64_t FileReader::ReadHuffmanInt(size_t num_bits)
