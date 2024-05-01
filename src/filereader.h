@@ -64,7 +64,7 @@ private:
     std::ifstream file_;
 
     unsigned char buffer_byte_ { 0 };
-    size_t bit_pos_ { 0 };
+    uint8_t bit_pos_ { 0 };
 
     size_t file_size_ { 0 };
 };
