@@ -1,6 +1,6 @@
 #include "archiver.h"
+
 #include <boost/program_options.hpp>
-#include <fstream>
 #include <iostream>
 #include <string>
 #include <vector>

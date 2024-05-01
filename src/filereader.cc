@@ -7,8 +7,7 @@
 #include <sys/types.h>
 
 FileReader::FileReader(const std::string& file_path)
-    : file_path_(file_path)
-    , file_(file_path_, std::ifstream::binary)
+    : file_path_(file_path), file_(file_path_, std::ifstream::binary)
 {
     if (!file_.is_open())
     {
