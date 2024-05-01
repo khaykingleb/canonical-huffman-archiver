@@ -9,7 +9,7 @@ BUILD_TYPE ?= Release
 
 prerequisites:  ## Install repo prerequisites
 ifeq ($(UNAME),Darwin)
-	brew install llvm@17
+	brew install llvm@18
 endif
 .PHONY: prerequisites
 
