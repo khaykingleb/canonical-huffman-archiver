@@ -6,7 +6,6 @@
 
 FileWriter::FileWriter(const std::string& archive_path)
     : archive_path_(archive_path), file_(archive_path_, std::ofstream::binary)
-
 {
     if (!file_.is_open())
     {
