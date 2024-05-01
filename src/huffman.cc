@@ -1,44 +1,38 @@
 #include "huffman.h"
+
 #include "filereader.h"
 #include "filewriter.h"
+
 #include <bitset>
 #include <cstddef>
 #include <cstdint>
-#include <iostream>
-#include <map>
 #include <memory>
-#include <queue>
 #include <string>
 #include <unordered_map>
 #include <vector>
 
-
-HuffmanCoder::HuffmanCoder(FileWriter& writer, FileReader& reader)
-    : writer_(writer)
-    , reader_(reader)
+HuffmanCoder::HuffmanCoder(FileReader& reader, FileWriter& writer)
+    : reader_(reader), writer_(writer)
 {
 }
 
-
-void HuffmanCoder::BuildCanonicalCodes()
+HuffmanCodes HuffmanCoder::BuildCodes()
 {
     auto character_frequencies = GetCharacterFrequencies();
-    auto binary_trie = BuildBinaryTrie(character_frequencies);
-    GenerateHuffmanCodes(binary_trie, "");
-    MoveHuffmanCodesToCanonicalForm();
+    auto root = BuildTrie(character_frequencies);
+
+    HuffmanCodes codes;
+    GenerateHuffmanCodes(root, "", codes);
+
+    return codes;
 }
 
-HuffmanCodes HuffmanCoder::GetCodes() const
+CharacterFrequencies HuffmanCoder::GetCharacterFrequencies() const
 {
-    return codes_;
-}
-
-std::unordered_map<uint16_t, uint64_t> HuffmanCoder::GetCharacterFrequencies() const
-{
-    std::unordered_map<uint16_t, uint64_t> frequency_table;
+    CharacterFrequencies frequency_table;
 
     // Count the frequency of each character in the file name
-    std::string file_name = reader_.GetFileName();
+    auto file_name = reader_.GetFileName();
     for (const auto& character : file_name)
     {
         frequency_table[character]++;
@@ -64,12 +58,11 @@ std::unordered_map<uint16_t, uint64_t> HuffmanCoder::GetCharacterFrequencies() c
     return frequency_table;
 }
 
-std::shared_ptr<Node> HuffmanCoder::BuildBinaryTrie(
-    const std::unordered_map<uint16_t, uint64_t>& character_frequencies) const
+std::shared_ptr<Node>
+HuffmanCoder::BuildTrie(const CharacterFrequencies& character_frequencies) const
 {
     // Build a min heap of nodes
-    std::priority_queue<std::shared_ptr<Node>, std::vector<std::shared_ptr<Node>>, NodeCompare>
-        min_heap;
+    MinHeap min_heap;
     for (const auto& [character, frequency] : character_frequencies)
     {
         min_heap.emplace(
@@ -93,8 +86,9 @@ std::shared_ptr<Node> HuffmanCoder::BuildBinaryTrie(
     return min_heap.top();
 }
 
-
-void HuffmanCoder::GenerateHuffmanCodes(const std::shared_ptr<Node>& node, const std::string& code)
+void HuffmanCoder::GenerateHuffmanCodes(const std::shared_ptr<Node>& node,
+                                        const std::string& code,
+                                        HuffmanCodes& codes)
 {
     if (node == nullptr)
     {
@@ -103,83 +97,99 @@ void HuffmanCoder::GenerateHuffmanCodes(const std::shared_ptr<Node>& node, const
 
     if (node->left == nullptr && node->right == nullptr)
     {
-        codes_.insert({ node->character, code });
+        codes.emplace(std::make_pair(code.size(), node->character), code);
         return;
     }
 
     if (node->left != nullptr)
     {
-        GenerateHuffmanCodes(node->left, code + "0");
+        GenerateHuffmanCodes(node->left, code + "0", codes);
     }
 
     if (node->right != nullptr)
     {
-        GenerateHuffmanCodes(node->right, code + "1");
+        GenerateHuffmanCodes(node->right, code + "1", codes);
     }
 }
 
-void HuffmanCoder::MoveHuffmanCodesToCanonicalForm()
+std::tuple<HuffmanCodes, HuffmanCodesForLookup> MoveCodesToCanonicalForm(HuffmanCodes codes)
 {
-    std::map<size_t, std::vector<uint16_t>> code_bit_lengths;
-    for (const auto& [character, code] : codes_)
-    {
-        code_bit_lengths[code.size()].emplace_back(character);
-    }
+    HuffmanCodes canonical_codes;
+    HuffmanCodesForLookup canonical_codes_for_lookup;
 
-    size_t current_code_bit_length = 0;
+    size_t previous_code_bit_length = 0;
     uint16_t current_code = 0;
-    for (const auto& [code_bit_length, characters] : code_bit_lengths)
+    for (const auto& [key, code] : codes)
     {
-        current_code <<= (code_bit_length - current_code_bit_length);
-        for (const auto& character : characters)
-        {
-            auto canonical_code = std::bitset<16>(current_code).to_string();
-            auto trimmed_canonical_code = canonical_code.substr(16 - code_bit_length);
-            codes_.insert({ character, trimmed_canonical_code });
+        auto [code_bit_length, character] = key;
 
-            current_code++;
-        }
+        current_code <<= (code_bit_length - previous_code_bit_length);
+        auto canonical_code
+            = std::bitset<16>(current_code).to_string().substr(16 - code_bit_length);
 
-        current_code_bit_length = code_bit_length;
+        canonical_codes.emplace(std::make_pair(code_bit_length, character), canonical_code);
+        canonical_codes_for_lookup.emplace(character, canonical_code);
+
+        current_code++;
+        previous_code_bit_length = code_bit_length;
     }
-}
 
+    return { canonical_codes, canonical_codes_for_lookup };
+}
 
 void HuffmanCoder::Encode()
 {
-    // TODO: SHOULD BE REALLY SORTED
-    // for (const auto& [character, code] : codes_)
-    // {
-    //     std::cout << character << " " << code << std::endl;
-    // }
+    // Build the Huffman codes
+    HuffmanCodes codes = BuildCodes();
+    auto [canonical_codes, canonical_codes_for_lookup] = MoveCodesToCanonicalForm(codes);
 
     // Write the number of characters in the file
-    writer_.WriteBits(codes_.size(), 9);
+    writer_.WriteHuffmanInt(canonical_codes.size());
 
-    // Write the alphabet characters
-    for (const auto& [character, _] : codes_)
+    // Write the characters
+    for (const auto& [key, _] : canonical_codes)
     {
-        writer_.WriteBits(character, 9);
+        auto character = key.second;
+        writer_.WriteHuffmanInt(character);
     }
 
-    // auto symbols_count = reader_.ReadHuffmanInt(9);
-    // std::cout << "symbols_count: " << symbols_count << std::endl;
-
-    // for (size_t i = 0; i < symbols_count; ++i)
-    // {
-    //     auto character = reader_.ReadHuffmanInt(9);
-    //     std::cout << "character: " << character << std::endl;
-    // }
-
     // Write the canonical Huffman codes
-    // for (const auto& [_, code] : codes_)
-    // {
-    //     for (const auto& bit : code)
-    //     {
-    //         writer_.WriteBits(bit - '0', 1);
-    //     }
-    // }
+    for (const auto& [_, canonical_code] : canonical_codes)
+    {
+        size_t num_bits_for_writing = canonical_code.size();
+        writer_.WriteHuffmanInt(std::stoll(canonical_code, nullptr, 2), num_bits_for_writing);
+    };
 
+    // Reset the reader position to the start of the file
+    reader_.ResetPositionToStart();
 
-    // writer_.WriteBits(codes_.size(), 9);
+    // Write the file name
+    std::string file_name = reader_.GetFileName();
+    for (const auto& character : file_name)
+    {
+        auto it = canonical_codes_for_lookup.find(character);
+        if (it != canonical_codes_for_lookup.end())
+        {
+            std::string canonical_code = it->second;
+            size_t num_bits_for_writing = canonical_code.size();
+            writer_.WriteHuffmanInt(std::stoll(canonical_code, nullptr, 2), num_bits_for_writing);
+        }
+    }
+
+    // Write the file content
+    while (reader_.HasMoreCharacters())
+    {
+        auto character = reader_.ReadCharacter();
+        if (character.has_value())
+        {
+            auto it = canonical_codes_for_lookup.find(*character);
+            if (it != canonical_codes_for_lookup.end())
+            {
+                std::string canonical_code = it->second;
+                size_t num_bits_for_writing = canonical_code.size();
+                writer_.WriteHuffmanInt(std::stoll(canonical_code, nullptr, 2),
+                                        num_bits_for_writing);
+            }
+        }
+    }
 }

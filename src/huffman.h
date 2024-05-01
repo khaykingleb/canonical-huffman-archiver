@@ -1,20 +1,21 @@
 #include "filereader.h"
 #include "filewriter.h"
 
+#include <map>
 #include <memory>
-#include <set>
+#include <queue>
 #include <string>
 #include <unordered_map>
 
 /*
  * Special codes for the Huffman coding.
  */
-const uint16_t FILENAME_END = 256;
-const uint16_t ONE_MORE_FILE = 257;
-const uint16_t ARCHIVE_END = 258;
+constexpr uint16_t FILENAME_END = 256;
+constexpr uint16_t ONE_MORE_FILE = 257;
+constexpr uint16_t ARCHIVE_END = 258;
 
-/**
- * Node of the Huffman tree.
+/*
+ * Data structures to build the Huffman binary trie.
  */
 struct Node
 {
@@ -24,7 +25,6 @@ struct Node
     std::shared_ptr<Node> right;
 };
 
-// Comparator for priority queue
 struct NodeCompare
 {
     bool operator()(const std::shared_ptr<Node>& lhs, const std::shared_ptr<Node>& rhs)
@@ -33,45 +33,83 @@ struct NodeCompare
     }
 };
 
-// Comparator for sorting the codes
-struct CodeCompare
+using MinHeap
+    = std::priority_queue<std::shared_ptr<Node>, std::vector<std::shared_ptr<Node>>, NodeCompare>;
+
+/*
+ * Data structures to create the Huffman codes.
+ */
+using CharacterFrequencies = std::unordered_map<uint16_t, uint64_t>;
+using HuffmanKey = std::pair<size_t, uint16_t>; // (code length, character)
+
+struct HuffmanKeyCompare
 {
-    bool operator()(const std::pair<uint16_t, std::string>& lhs,
-                    const std::pair<uint16_t, std::string>& rhs) const
+    bool operator()(const HuffmanKey& lhs, const HuffmanKey& rhs) const
     {
-        // Compare lexicographically if the lengths are equal
-        if (lhs.second.size() == rhs.second.size())
+        if (lhs.first == rhs.first)
         {
-            return lhs.first < rhs.first;
+            return lhs.second < rhs.second;
         }
-        // Otherwise, compare by the length of the code
-        return lhs.second.size() < rhs.second.size();
+        return lhs.first < rhs.first;
     }
 };
 
-using HuffmanCodes = std::set<std::pair<uint16_t, std::string>, CodeCompare>;
+using HuffmanCodes = std::map<HuffmanKey, std::string, HuffmanKeyCompare>;
+using HuffmanCodesForLookup = std::unordered_map<uint16_t, std::string>;
 
+/*
+ * Move the Huffman codes to canonical form.
+ */
+std::tuple<HuffmanCodes, HuffmanCodesForLookup> MoveCodesToCanonicalForm(HuffmanCodes codes);
+
+/*
+ * Class to encode the file using Huffman coding algorithm.
+ */
 class HuffmanCoder
 {
 public:
-    // Constructor
-    HuffmanCoder(FileWriter& writer, FileReader& reader);
+    /*
+     * Constructor.
+     * @param reader The file reader.
+     * @param writer The file writer.
+     */
+    HuffmanCoder(FileReader& reader, FileWriter& writer);
 
-    void BuildCanonicalCodes();
-    HuffmanCodes GetCodes() const;
+    /*
+     * Encode the file using Huffman coding algorithm.
+     */
     void Encode();
 
 protected:
-    std::unordered_map<uint16_t, uint64_t> GetCharacterFrequencies() const;
-    std::shared_ptr<Node>
-    BuildBinaryTrie(const std::unordered_map<uint16_t, uint64_t>& character_frequencies) const;
-    void GenerateHuffmanCodes(const std::shared_ptr<Node>& node, const std::string& code);
-    void MoveHuffmanCodesToCanonicalForm();
+    /*
+     * Build the canonical Huffman codes.
+     */
+    HuffmanCodes BuildCodes();
+
+    /*
+     * Get the character frequencies from the file.
+     * @return The character frequencies.
+     */
+    CharacterFrequencies GetCharacterFrequencies() const;
+
+    /*
+     * Build the Huffman binary trie from the character frequencies using a priority queue
+     * with bottom-up approach.
+     * @param character_frequencies The character frequencies.
+     * @return The root of the Huffman binary trie.
+     */
+    std::shared_ptr<Node> BuildTrie(const CharacterFrequencies& character_frequencies) const;
+
+    /*
+     * Generate the Huffman codes.
+     * @param node The current node in the Huffman binary trie
+     * @param code The current code
+     */
+    void GenerateHuffmanCodes(const std::shared_ptr<Node>& node,
+                              const std::string& code,
+                              HuffmanCodes& codes);
 
 private:
-    FileWriter& writer_;
     FileReader& reader_;
-
-    // std::unordered_map<uint16_t, std::string> codes_;
-    HuffmanCodes codes_;
+    FileWriter& writer_;
 };

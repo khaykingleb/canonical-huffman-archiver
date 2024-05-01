@@ -16,9 +16,11 @@ PointerAlignment: Left
 AllowShortIfStatementsOnASingleLine: Never
 AllowShortBlocksOnASingleLine: Never
 AllowShortFunctionsOnASingleLine: Inline
+AllowAllParametersOfDeclarationOnNextLine: false
 
 AlignAfterOpenBracket: Align
 BreakBeforeBraces: Custom
+BreakConstructorInitializers: BeforeColon
 BraceWrapping:
     AfterClass: true
     AfterControlStatement: true
