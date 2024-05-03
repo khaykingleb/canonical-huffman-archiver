@@ -4,12 +4,12 @@
 #include <cstdint>
 #include <vector>
 
-FileWriter::FileWriter(const std::string& archive_path)
-    : archive_path_(archive_path), file_(archive_path_, std::ofstream::binary)
+FileWriter::FileWriter(const std::string& file_path)
+    : file_path_(file_path), file_(file_path, std::ofstream::binary)
 {
     if (!file_.is_open())
     {
-        throw std::runtime_error("The file writer cannot open " + archive_path_);
+        throw std::runtime_error("The file writer cannot open " + file_path);
     }
 }
 

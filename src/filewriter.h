@@ -12,9 +12,9 @@ class FileWriter
 public:
     /**
      * Constructor.
-     * @param archive_path The path to the file to write to.
+     * @param file_path The path to the file to write to.
      */
-    explicit FileWriter(const std::string& archive_path);
+    explicit FileWriter(const std::string& file_path);
 
     /**
      * Destructor.
@@ -41,7 +41,7 @@ protected:
     void FlushBuffer();
 
 private:
-    std::string archive_path_;
+    std::string file_path_;
     std::ofstream file_;
 
     unsigned char buffer_byte_ { 0 };
