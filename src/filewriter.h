@@ -3,6 +3,7 @@
 #include <cstddef>
 #include <cstdint>
 #include <fstream>
+#include <vector>
 
 /**
  * A class for writing to a file bit by bit.
