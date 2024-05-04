@@ -33,13 +33,13 @@ build:  ## Build project
 	docker compose -f docker-compose.yaml up --build
 .PHONY: build
 
-run:  ## Run bash in container
-	docker run -v $(PWD):/app -it canonical-huffman-archiver:$(VERSION) /bin/bash
-.PHONY: run
-
 test:  ## Run tests
 	docker run -v $(PWD):/app -it canonical-huffman-archiver:0.1.0 bash -c "cd build/tests && ctest"
 .PHONY: test
+
+run:  ## Run bash in container
+	docker run -v $(PWD):/app -it canonical-huffman-archiver:$(VERSION) /bin/bash
+.PHONY: run
 
 ##==================================================================================================
 ##@ Conan
@@ -49,15 +49,12 @@ conan-profile:  ## Guess a configuration set (compiler, build configuration, arc
 	perl -pi -e 'chomp if eof' conanprofile.txt
 .PHONY: conan-profile
 
-conan-install:  ## Install C++ dependencies
+conan-build: conan-profile  ## Build project with Conan
 	poetry run conan install . \
 		--profile=conanprofile.txt \
 		--settings=compiler.cppstd=gnu23 \
 		--settings=build_type=$(BUILD_TYPE) \
-		--build=missing
-.PHONY: conan-install
-
-conan-build: conan-profile conan-install ## Build project with Conan
+		--build=missing \
 	cd build \
 	&& cmake .. \
 		-DCMAKE_TOOLCHAIN_FILE=$(BUILD_TYPE)/generators/conan_toolchain.cmake \
