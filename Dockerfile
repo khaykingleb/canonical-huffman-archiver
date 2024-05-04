@@ -37,4 +37,5 @@ RUN --mount=type=cache,target=/root/.cache/pypoetry/cache \
 
 # Build the project
 COPY . ./
+ARG BUILD_TYPE=Release
 RUN make conan-build BUILD_TYPE="$BUILD_TYPE"
