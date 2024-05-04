@@ -5,16 +5,14 @@ Program that compresses and decompresses ASCII files based on [Huffman Coding](h
 ## Getting Started
 
 * In general, use the following to run the archiver program:
-
-```shell
-make build && make test && make run
-```
+   ```shell
+   make build && make test && make run
+   ```
 
 * For local development, you can attempt to use:
-
-```shell
-make local-init && make conan-build
-```
+   ```shell
+   make local-init && make conan-build
+   ```
 
 ## Commands
 
