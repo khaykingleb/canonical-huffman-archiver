@@ -1,0 +1,10 @@
+version: "3.9"
+
+services:
+  archiver:
+    build:
+      context: .
+      args:
+        - BUILD_TYPE=${BUILD_TYPE}
+    image: canonical-huffman-archiver:${VERSION}
+    container_name: canonical-huffman-archiver

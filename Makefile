@@ -1,73 +1,74 @@
-VERSION := 0.1.0
 SHELL := /bin/bash
-UNAME := $(shell uname -s)
 .DEFAULT_GOAL = help
+
+export BUILD_TYPE := Release
+export VERSION := $(shell grep -m 1 version pyproject.toml | grep -e '\d.\d.\d' -o)
+UNAME := $(shell uname)
+DOCKER_BUILDKIT := 1
 
 ##==================================================================================================
 ##@ Repo initialization
 
-repo-prerequisites:  ## Install prerequisites
+prerequisite: ## Install prerequisite tools
 ifeq ($(UNAME), Darwin)
-	brew install llvm
+	brew install llvm@18
 endif
-.PHONY: repo-prerequisites
 
-repo-deps:  ## Install repo deps
-	pip install poetry
-	poetry config virtualenvs.in-project true
+deps:  ## Install repo deps
 	poetry install
-.PHONY: repo-deps
+.PHONY: deps
 
-repo-pre-commit:  ## Install pre-commit
+pre-commit:  ## Install pre-commit
 	poetry run pre-commit install
 	poetry run pre-commit install -t commit-msg
-.PHONY: repo-pre-commit
+.PHONY: pre-commit
 
-repo-init: repo-prerequisites repo-deps repo-pre-commit  ## Initialize repo by executing above commands
-.PHONY: repo-init
+local-init: prerequisite deps pre-commit  ## Initialize local environment for development
+.PHONY: local-init
 
 ##==================================================================================================
-##@ Building with CMake
+##@ Macros
 
-.ONESHELL:
 build:  ## Build project
-	poetry run conan install . \
-		--build=missing \
-		--profile=conanprofile.txt \
-		--settings=compiler.cppstd=gnu20
-	cd build
-	source Release/generators/conanbuild.sh
-	cmake .. \
-		-DCMAKE_TOOLCHAIN_FILE=Release/generators/conan_toolchain.cmake \
-		-DCMAKE_BUILD_TYPE=Release \
-		-DCMAKE_EXPORT_COMPILE_COMMANDS=ON
-	cmake --build .
-	source Release/generators/deactivate_conanbuild.sh
+	docker compose -f docker-compose.yaml up --build
 .PHONY: build
 
-tests:  ## Run tests
-	cd build && ctest
-.PHONY: tests
+test:  ## Run tests
+	docker run -v $(PWD):/app -it canonical-huffman-archiver:0.1.0 bash -c "cd build/tests && ctest"
+.PHONY: test
+
+run:  ## Run bash in container
+	docker run -v $(PWD):/app -it canonical-huffman-archiver:$(VERSION) /bin/bash
+.PHONY: run
 
 ##==================================================================================================
-##@ Cleaning
-
-clean: ## Delete junk files
-	find . | grep -E "\.o" | xargs rm -rf
-	find . | grep -E "\.exe" | xargs rm -rf
-.PHONY: clean
-
-##==================================================================================================
-##@ Miscellaneous
+##@ Conan
 
 conan-profile:  ## Guess a configuration set (compiler, build configuration, architecture, shared or static libraries, etc.)
 	poetry run conan profile detect --force | grep -v "Detected profile:" > conanprofile.txt
 	perl -pi -e 'chomp if eof' conanprofile.txt
 .PHONY: conan-profile
 
-conan-lock:  ## Lock dependencies
+conan-build: conan-profile  ## Build project with Conan
+	poetry run conan install . \
+		--profile=conanprofile.txt \
+		--settings=compiler.cppstd=gnu23 \
+		--settings=build_type=$(BUILD_TYPE) \
+		--build=missing \
+	&& cd build \
+	&& cmake .. \
+		-DCMAKE_TOOLCHAIN_FILE=$(BUILD_TYPE)/generators/conan_toolchain.cmake \
+		-DCMAKE_BUILD_TYPE=$(BUILD_TYPE) \
+		-DCMAKE_EXPORT_COMPILE_COMMANDS=ON \
+	&& cmake --build .
+.PHONY: conan-build
+
+conan-lock:  ## Lock C++ dependencies
 	poetry run conan lock create .
 .PHONY: conan-lock
+
+##==================================================================================================
+##@ Miscellaneous
 
 update-pre-commit-hooks:  ## Update pre-commit hooks
 	poetry run pre-commit autoupdate
@@ -81,6 +82,10 @@ audit-secrets-baseline:  ## Check updated .secrets.baseline file
 	poetry run detect-secrets audit .secrets.baseline
 	git commit .secrets.baseline --no-verify -m "build(security): update secrets.baseline"
 .PHONY: audit-secrets-baseline
+
+clean: ## Delete junk files
+	rm -rf build .cache .venv CMakeUserPresets.json conanprofile.txt
+.PHONY: clean
 
 ##==================================================================================================
 ##@ Helper

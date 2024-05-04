@@ -1,6 +1,0 @@
-*.o
-*.exe
-.cache
-conanprofile.txt
-build
-CMakeUserPresets.json
