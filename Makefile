@@ -3,10 +3,16 @@ SHELL := /bin/bash
 
 export BUILD_TYPE := Release
 export VERSION := $(shell grep -m 1 version pyproject.toml | grep -e '\d.\d.\d' -o)
+UNAME := $(shell uname)
 DOCKER_BUILDKIT := 1
 
 ##==================================================================================================
 ##@ Repo initialization
+
+prerequisite: ## Install prerequisite tools
+ifeq ($(UNAME), Darwin)
+	brew install llvm@18
+endif
 
 deps:  ## Install repo deps
 	poetry install
@@ -17,7 +23,7 @@ pre-commit:  ## Install pre-commit
 	poetry run pre-commit install -t commit-msg
 .PHONY: pre-commit
 
-local-init: deps pre-commit  ## Initialize local environment for development
+local-init: prerequisite deps pre-commit  ## Initialize local environment for development
 .PHONY: local-init
 
 ##==================================================================================================
