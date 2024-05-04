@@ -35,5 +35,6 @@ RUN --mount=type=cache,target=/root/.cache/pypoetry/cache \
         && poetry config virtualenvs.create false \
         && poetry install --only main
 
-# Copy the project files
+# Build the project
 COPY . ./
+RUN make conan-build BUILD_TYPE="$BUILD_TYPE"

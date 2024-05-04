@@ -4,11 +4,7 @@ services:
   archiver:
     build:
       context: .
+      args:
+        - BUILD_TYPE=${BUILD_TYPE}
     image: canonical-huffman-archiver:${VERSION}
     container_name: canonical-huffman-archiver
-    command: ["/app/build.sh"]
-    environment:
-      - BUILD_TYPE=${BUILD_TYPE}
-    volumes:
-      - .:/app
-      - ~/.conan2/p:/root/.conan2/p

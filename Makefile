@@ -49,13 +49,16 @@ conan-profile:  ## Guess a configuration set (compiler, build configuration, arc
 	perl -pi -e 'chomp if eof' conanprofile.txt
 .PHONY: conan-profile
 
-conan-build:  ## Build project with Conan
+conan-install:  ## Install C++ dependencies
 	poetry run conan install . \
-		--build=missing \
 		--profile=conanprofile.txt \
 		--settings=compiler.cppstd=gnu23 \
 		--settings=build_type=$(BUILD_TYPE) \
-	&& cd build \
+		--build=missing
+.PHONY: conan-install
+
+conan-build: conan-profile conan-install ## Build project with Conan
+	cd build \
 	&& cmake .. \
 		-DCMAKE_TOOLCHAIN_FILE=$(BUILD_TYPE)/generators/conan_toolchain.cmake \
 		-DCMAKE_BUILD_TYPE=$(BUILD_TYPE) \
