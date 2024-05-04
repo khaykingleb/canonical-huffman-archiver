@@ -1,17 +1,12 @@
-VERSION := 0.1.0
 SHELL := /bin/bash
-UNAME := $(shell uname -s)
-BUILD_TYPE ?= Release
 .DEFAULT_GOAL = help
+
+export BUILD_TYPE := Release
+export VERSION := $(shell grep -m 1 version pyproject.toml | grep -e '\d.\d.\d' -o)
+DOCKER_BUILDKIT := 1
 
 ##==================================================================================================
 ##@ Repo initialization
-
-prerequisites:  ## Install repo prerequisites
-ifeq ($(UNAME),Darwin)
-	brew install llvm@18
-endif
-.PHONY: prerequisites
 
 deps:  ## Install repo deps
 	poetry install
@@ -22,13 +17,33 @@ pre-commit:  ## Install pre-commit
 	poetry run pre-commit install -t commit-msg
 .PHONY: pre-commit
 
-init: prerequisites deps pre-commit  ## Initialize repo by executing above commands
-.PHONY: init
+local-init: deps pre-commit  ## Initialize local environment for development
+.PHONY: local-init
 
 ##==================================================================================================
-##@ Building with CMake
+##@ Macros
 
 build:  ## Build project
+	docker compose -f docker-compose.yaml up --build
+.PHONY: build
+
+run:  ## Run bash in container
+	docker run -v $(PWD):/app -it canonical-huffman-archiver:$(VERSION) /bin/bash
+.PHONY: run
+
+test:  ## Run tests
+	docker run -v $(PWD):/app -it canonical-huffman-archiver:0.1.0 bash -c "cd build/tests && ctest"
+.PHONY: test
+
+##==================================================================================================
+##@ Conan
+
+conan-profile:  ## Guess a configuration set (compiler, build configuration, architecture, shared or static libraries, etc.)
+	poetry run conan profile detect --force | grep -v "Detected profile:" > conanprofile.txt
+	perl -pi -e 'chomp if eof' conanprofile.txt
+.PHONY: conan-profile
+
+conan-build:  ## Build project with Conan
 	poetry run conan install . \
 		--build=missing \
 		--profile=conanprofile.txt \
@@ -40,32 +55,14 @@ build:  ## Build project
 		-DCMAKE_BUILD_TYPE=$(BUILD_TYPE) \
 		-DCMAKE_EXPORT_COMPILE_COMMANDS=ON \
 	&& cmake --build .
-.PHONY: build
-
-tests:  ## Run tests
-	cd build && ctest
-.PHONY: tests
-
-##==================================================================================================
-##@ Cleaning
-
-clean: ## Delete junk files
-	find . | grep -E "\.o" | xargs rm -rf
-	find . | grep -E "\.exe" | xargs rm -rf
-	rm -rf build
-.PHONY: clean
-
-##==================================================================================================
-##@ Miscellaneous
-
-conan-profile:  ## Guess a configuration set (compiler, build configuration, architecture, shared or static libraries, etc.)
-	poetry run conan profile detect --force | grep -v "Detected profile:" > conanprofile.txt
-	perl -pi -e 'chomp if eof' conanprofile.txt
-.PHONY: conan-profile
+.PHONY: conan-build
 
 conan-lock:  ## Lock C++ dependencies
 	poetry run conan lock create .
 .PHONY: conan-lock
+
+##==================================================================================================
+##@ Miscellaneous
 
 update-pre-commit-hooks:  ## Update pre-commit hooks
 	poetry run pre-commit autoupdate
@@ -79,6 +76,10 @@ audit-secrets-baseline:  ## Check updated .secrets.baseline file
 	poetry run detect-secrets audit .secrets.baseline
 	git commit .secrets.baseline --no-verify -m "build(security): update secrets.baseline"
 .PHONY: audit-secrets-baseline
+
+clean: ## Delete junk files
+	rm -rf build .cache .venv CMakeUserPresets.json conanprofile.txt
+.PHONY: clean
 
 ##==================================================================================================
 ##@ Helper
