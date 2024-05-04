@@ -65,7 +65,8 @@ uint64_t FileReader::ReadHuffmanInt(size_t num_bits)
     for (size_t i = 0; i < num_bits; ++i)
     {
         bool bit = ReadBit();
-        number |= static_cast<uint64_t>(bit) << (num_bits - 1 - i);
+        // Shift the bit to the correct position starting from LSB
+        number |= static_cast<uint64_t>(bit) << i;
     }
     return number;
 }
@@ -84,7 +85,8 @@ bool FileReader::ReadBit()
         buffer_byte_ = byte;
     }
 
-    bool bit = buffer_byte_ & (1 << (7 - bit_pos_));
+    // Read the bit starting from LSB
+    bool bit = buffer_byte_ & (1 << bit_pos_);
 
     ++bit_pos_;
     bit_pos_ %= 8;

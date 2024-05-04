@@ -27,8 +27,8 @@ void FileWriter::WriteHuffmanInt(uint64_t number, size_t num_bits)
     std::vector<bool> bits(num_bits);
     for (size_t i = 0; i < num_bits; ++i)
     {
-        // Fill from the most significant bit to the least significant bit
-        bits[num_bits - 1 - i] = (number >> i) & 1;
+        // Fill from the least significant bit to the most significant bit
+        bits[i] = (number >> i) & 1;
     }
 
     WriteBits(bits);
@@ -42,7 +42,7 @@ void FileWriter::WriteBits(const std::vector<bool>& bits)
         if (bit)
         {
             // Set specific bit in the buffer byte without altering other bits that are already set
-            buffer_byte_ |= (1 << (7 - bit_pos_));
+            buffer_byte_ |= (1 << bit_pos_);
         }
 
         ++bit_pos_;
