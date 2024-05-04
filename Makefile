@@ -55,7 +55,7 @@ conan-build: conan-profile  ## Build project with Conan
 		--settings=compiler.cppstd=gnu23 \
 		--settings=build_type=$(BUILD_TYPE) \
 		--build=missing \
-	cd build \
+	&& cd build \
 	&& cmake .. \
 		-DCMAKE_TOOLCHAIN_FILE=$(BUILD_TYPE)/generators/conan_toolchain.cmake \
 		-DCMAKE_BUILD_TYPE=$(BUILD_TYPE) \
