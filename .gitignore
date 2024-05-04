@@ -1,6 +1,7 @@
 *.o
 *.exe
 .cache
+.venv
 build
 CMakeUserPresets.json
 conanprofile.txt
