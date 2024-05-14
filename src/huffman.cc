@@ -3,9 +3,12 @@
 #include "filereader.h"
 #include "filewriter.h"
 
+#include <_types/_uint16_t.h>
 #include <bitset>
 #include <cstddef>
 #include <cstdint>
+#include <cstdio>
+#include <iostream>
 #include <memory>
 #include <string>
 #include <unordered_map>
@@ -32,12 +35,50 @@ void HuffmanCoder::Encode() const
         writer_.WriteHuffmanInt(character);
     }
 
-    // Write the canonical Huffman codes
-    for (const auto& [_, canonical_code] : canonical_codes)
+    // Write a list of sizes of each character group in the canonical codes
+    size_t previous_code_length = 0;
+    size_t count_of_codes_with_same_length = 0;
+
+    /// Write zeros from up to the first code length
+    auto first_code_length = canonical_codes.begin()->first.first;
+    for (size_t missing_length = 1; missing_length < first_code_length; ++missing_length)
     {
-        size_t num_bits_for_writing = canonical_code.size();
-        writer_.WriteHuffmanInt(std::stoll(canonical_code, nullptr, 2), num_bits_for_writing);
-    };
+        writer_.WriteHuffmanInt(0);
+        // std::cout << "Bit length: " << missing_length << " Count: 0\n";
+    }
+
+    /// Write the count of codes with the same length
+    for (const auto& [key, _] : canonical_codes)
+    {
+        size_t current_code_length = key.first;
+        if (current_code_length != previous_code_length)
+        {
+            if (previous_code_length != 0)
+            {
+                // Write the count for the previous code length
+                writer_.WriteHuffmanInt(count_of_codes_with_same_length);
+
+                // Write zero for any missing code lengths between the previous and current
+                for (size_t missing_length = previous_code_length + 1;
+                     missing_length < current_code_length;
+                     ++missing_length)
+                {
+                    writer_.WriteHuffmanInt(0);
+                }
+            }
+
+            previous_code_length = current_code_length;
+            count_of_codes_with_same_length = 0;
+        }
+
+        count_of_codes_with_same_length++;
+    }
+
+    /// Final write for the last group of codes
+    if (count_of_codes_with_same_length != 0)
+    {
+        writer_.WriteHuffmanInt(count_of_codes_with_same_length);
+    }
 
     // Reset the reader position to the start of the file
     reader_.ResetPositionToStart();
@@ -50,8 +91,7 @@ void HuffmanCoder::Encode() const
         if (it != canonical_codes_for_lookup.end())
         {
             std::string canonical_code = it->second;
-            size_t num_bits_for_writing = canonical_code.size();
-            writer_.WriteHuffmanInt(std::stoll(canonical_code, nullptr, 2), num_bits_for_writing);
+            writer_.WriteHuffmanCode(canonical_code);
         }
     }
 
@@ -65,9 +105,7 @@ void HuffmanCoder::Encode() const
             if (it != canonical_codes_for_lookup.end())
             {
                 std::string canonical_code = it->second;
-                size_t num_bits_for_writing = canonical_code.size();
-                writer_.WriteHuffmanInt(std::stoll(canonical_code, nullptr, 2),
-                                        num_bits_for_writing);
+                writer_.WriteHuffmanCode(canonical_code);
             }
         }
     }
@@ -76,7 +114,7 @@ void HuffmanCoder::Encode() const
 HuffmanCodes HuffmanCoder::BuildCodes() const
 {
     auto character_frequencies = GetCharacterFrequencies();
-    auto root = GetTrie(character_frequencies);
+    auto root = GetBinaryTrie(character_frequencies);
 
     HuffmanCodes codes;
     GenerateHuffmanCodes(root, "", codes);
@@ -115,7 +153,8 @@ CharacterFrequencies HuffmanCoder::GetCharacterFrequencies() const
     return frequency_table;
 }
 
-std::shared_ptr<Node> HuffmanCoder::GetTrie(const CharacterFrequencies& character_frequencies) const
+std::shared_ptr<Node>
+HuffmanCoder::GetBinaryTrie(const CharacterFrequencies& character_frequencies) const
 {
     // Build a min heap of nodes
     MinHeap min_heap;

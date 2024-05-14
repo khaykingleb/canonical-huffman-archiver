@@ -29,6 +29,12 @@ public:
      */
     void WriteHuffmanInt(uint64_t number, size_t num_bits = 9);
 
+    /**
+     * Write a Huffman code to the file.
+     * @param huffman_code The Huffman code to write.
+     */
+    void WriteHuffmanCode(const std::string& huffman_code);
+
 protected:
     /**
      * Write a bit to the file.

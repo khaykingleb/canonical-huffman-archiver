@@ -2,6 +2,7 @@
 
 #include <cstddef>
 #include <cstdint>
+#include <iostream>
 #include <vector>
 
 FileWriter::FileWriter(const std::string& file_path)
@@ -32,6 +33,13 @@ void FileWriter::WriteHuffmanInt(uint64_t number, size_t num_bits)
     }
 
     WriteBits(bits);
+}
+
+void FileWriter::WriteHuffmanCode(const std::string& huffman_code)
+{
+    uint64_t number = std::stoll(huffman_code, nullptr, 2);
+    size_t num_bits = huffman_code.size();
+    WriteHuffmanInt(number, num_bits);
 }
 
 void FileWriter::WriteBits(const std::vector<bool>& bits)

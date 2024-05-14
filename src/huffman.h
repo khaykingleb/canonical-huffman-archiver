@@ -46,11 +46,7 @@ struct HuffmanKeyCompare
 {
     bool operator()(const HuffmanKey& lhs, const HuffmanKey& rhs) const
     {
-        if (lhs.first == rhs.first)
-        {
-            return lhs.second < rhs.second;
-        }
-        return lhs.first < rhs.first;
+        return std::tie(lhs.first, lhs.second) < std::tie(rhs.first, rhs.second);
     }
 };
 
@@ -93,7 +89,7 @@ protected:
      * @param character_frequencies The character frequencies.
      * @return The root of the Huffman binary trie.
      */
-    std::shared_ptr<Node> GetTrie(const CharacterFrequencies& character_frequencies) const;
+    std::shared_ptr<Node> GetBinaryTrie(const CharacterFrequencies& character_frequencies) const;
 
     /*
      * Generate the Huffman codes.
