@@ -1,9 +1,9 @@
 #include "filereader.h"
 #include "filewriter.h"
+#include "trie.h"
 
 #include <map>
 #include <memory>
-#include <queue>
 #include <string>
 #include <unordered_map>
 
@@ -14,32 +14,6 @@ constexpr uint16_t FILENAME_END = 256;
 constexpr uint16_t ONE_MORE_FILE = 257;
 constexpr uint16_t ARCHIVE_END = 258;
 
-/*
- * Data structures to build the Huffman binary trie.
- */
-struct Node
-{
-    uint16_t character;
-    uint64_t frequency;
-    std::shared_ptr<Node> left;
-    std::shared_ptr<Node> right;
-};
-
-struct NodeCompare
-{
-    bool operator()(const std::shared_ptr<Node>& lhs, const std::shared_ptr<Node>& rhs)
-    {
-        return lhs->frequency > rhs->frequency;
-    }
-};
-
-using MinHeap
-    = std::priority_queue<std::shared_ptr<Node>, std::vector<std::shared_ptr<Node>>, NodeCompare>;
-
-/*
- * Data structures to create the Huffman codes.
- */
-using CharacterFrequencies = std::unordered_map<uint16_t, uint64_t>;
 using HuffmanKey = std::pair<size_t, uint16_t>; // (code length, character)
 
 struct HuffmanKeyCompare

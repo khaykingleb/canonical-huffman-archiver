@@ -2,6 +2,7 @@
 
 #include "filereader.h"
 #include "filewriter.h"
+#include "trie.h"
 
 #include <_types/_uint16_t.h>
 #include <bitset>
@@ -114,7 +115,8 @@ void HuffmanCoder::Encode() const
 HuffmanCodes HuffmanCoder::BuildCodes() const
 {
     auto character_frequencies = GetCharacterFrequencies();
-    auto root = GetBinaryTrie(character_frequencies);
+    BinaryTrie trie(character_frequencies);
+    auto root = trie.GetRoot();
 
     HuffmanCodes codes;
     GenerateHuffmanCodes(root, "", codes);
