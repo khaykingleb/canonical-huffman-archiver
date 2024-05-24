@@ -45,7 +45,6 @@ void HuffmanCoder::Encode() const
     for (size_t missing_length = 1; missing_length < first_code_length; ++missing_length)
     {
         writer_.WriteHuffmanInt(0);
-        // std::cout << "Bit length: " << missing_length << " Count: 0\n";
     }
 
     /// Write the count of codes with the same length
@@ -72,7 +71,7 @@ void HuffmanCoder::Encode() const
             count_of_codes_with_same_length = 0;
         }
 
-        count_of_codes_with_same_length++;
+        ++count_of_codes_with_same_length;
     }
 
     /// Final write for the last group of codes
@@ -132,7 +131,7 @@ CharacterFrequencies HuffmanCoder::GetCharacterFrequencies() const
     auto file_name = reader_.GetFileName();
     for (const auto& character : file_name)
     {
-        frequency_table[character]++;
+        ++frequency_table[static_cast<unsigned char>(character)];
     }
 
     // Count the frequency of each character in the file content
@@ -141,7 +140,7 @@ CharacterFrequencies HuffmanCoder::GetCharacterFrequencies() const
         auto character = reader_.ReadCharacter();
         if (character.has_value())
         {
-            frequency_table[*character]++;
+            ++frequency_table[*character];
         }
     }
 
@@ -149,7 +148,7 @@ CharacterFrequencies HuffmanCoder::GetCharacterFrequencies() const
     std::vector<uint16_t> special_codes = { ARCHIVE_END, FILENAME_END, ONE_MORE_FILE };
     for (const auto& special_code : special_codes)
     {
-        frequency_table[special_code]++;
+        ++frequency_table[special_code];
     }
 
     return frequency_table;
@@ -227,7 +226,7 @@ std::tuple<HuffmanCodes, HuffmanCodesForLookup> MoveCodesToCanonicalForm(Huffman
         canonical_codes.emplace(std::make_pair(code_bit_length, character), canonical_code);
         canonical_codes_for_lookup.emplace(character, canonical_code);
 
-        current_code++;
+        ++current_code;
         previous_code_bit_length = code_bit_length;
     }
 
