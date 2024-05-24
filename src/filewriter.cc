@@ -37,8 +37,10 @@ void FileWriter::WriteHuffmanInt(uint64_t number, size_t num_bits)
 
 void FileWriter::WriteHuffmanCode(const std::string& huffman_code)
 {
-    uint64_t number = std::stoll(huffman_code, nullptr, 2);
-    size_t num_bits = huffman_code.size();
+    // Reverse code to write it from the least significant bit to the most significant bit
+    std::string reversed_huffman_code(huffman_code.rbegin(), huffman_code.rend());
+    uint64_t number = std::stoll(reversed_huffman_code, nullptr, 2);
+    size_t num_bits = reversed_huffman_code.size();
     WriteHuffmanInt(number, num_bits);
 }
 
