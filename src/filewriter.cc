@@ -28,20 +28,18 @@ void FileWriter::WriteHuffmanInt(uint64_t number, size_t num_bits)
     std::vector<bool> bits(num_bits);
     for (size_t i = 0; i < num_bits; ++i)
     {
-        // Fill from the least significant bit to the most significant bit
-        bits[i] = (number >> i) & 1;
+        bits[i] = (number >> i) & 1; // fill from the LSB to the MSB
     }
-
     WriteBits(bits);
 }
 
 void FileWriter::WriteHuffmanCode(const std::string& huffman_code)
 {
-    // Reverse code to write it from the least significant bit to the most significant bit
+    // Reverse huffman code to write it from the least significant bit to the most significant bit
     std::string reversed_huffman_code(huffman_code.rbegin(), huffman_code.rend());
-    uint64_t number = std::stoll(reversed_huffman_code, nullptr, 2);
+    uint64_t huffman_code_to_number = std::stoll(reversed_huffman_code, nullptr, 2);
     size_t num_bits = reversed_huffman_code.size();
-    WriteHuffmanInt(number, num_bits);
+    WriteHuffmanInt(huffman_code_to_number, num_bits);
 }
 
 void FileWriter::WriteBits(const std::vector<bool>& bits)

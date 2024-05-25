@@ -2,7 +2,6 @@
 
 #include "filereader.h"
 
-#include <cstddef>
 #include <memory>
 #include <queue>
 #include <unordered_map>

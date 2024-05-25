@@ -53,24 +53,14 @@ BinaryTrie::BinaryTrie(const Symbols& symbols,
     for (size_t i = 0; i < symbols.size(); ++i)
     {
         auto node = root_;
-        for (size_t j = 0; j < huffman_codes[i].size(); ++j)
+        for (char bit : huffman_codes[i])
         {
-            if (huffman_codes[i][j] == '0')
+            auto& child = (bit == '0') ? node->left : node->right;
+            if (!child)
             {
-                if (!node->left)
-                {
-                    node->left = std::make_shared<Node>();
-                }
-                node = node->left;
+                child = std::make_shared<Node>();
             }
-            else
-            {
-                if (!node->right)
-                {
-                    node->right = std::make_shared<Node>();
-                }
-                node = node->right;
-            }
+            node = child;
         }
         node->character = symbols[i];
     }
@@ -86,14 +76,7 @@ uint16_t BinaryTrie::GetCharacter(FileReader& reader) const
     auto node = root_;
     while (node->left || node->right)
     {
-        if (reader.ReadBit())
-        {
-            node = node->right;
-        }
-        else
-        {
-            node = node->left;
-        }
+        node = reader.ReadBit() ? node->right : node->left;
     }
     return node->character;
 }
