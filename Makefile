@@ -9,11 +9,6 @@ DOCKER_BUILDKIT := 1
 ##==================================================================================================
 ##@ Repo initialization
 
-prerequisite: ## Install prerequisite tools
-ifeq ($(UNAME), Darwin)
-	brew install llvm@18
-endif
-
 deps:  ## Install repo deps
 	poetry install
 .PHONY: deps
@@ -23,7 +18,7 @@ pre-commit:  ## Install pre-commit
 	poetry run pre-commit install -t commit-msg
 .PHONY: pre-commit
 
-local-init: prerequisite deps pre-commit  ## Initialize local environment for development
+local-init: deps pre-commit  ## Initialize local environment for development
 .PHONY: local-init
 
 ##==================================================================================================
@@ -83,7 +78,7 @@ audit-secrets-baseline:  ## Check updated .secrets.baseline file
 	git commit .secrets.baseline --no-verify -m "build(security): update secrets.baseline"
 .PHONY: audit-secrets-baseline
 
-clean: ## Delete junk files
+clean: ## Delete build files
 	rm -rf build .cache .venv CMakeUserPresets.json conanprofile.txt
 .PHONY: clean
 

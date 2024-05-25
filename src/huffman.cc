@@ -4,6 +4,8 @@
 #include "filewriter.h"
 #include "trie.h"
 
+#include <bitset>
+
 std::tuple<HuffmanCodes, HuffmanCodesForLookup>
 HuffmanCoder::MoveCodesToCanonicalForm(HuffmanCodes codes) const
 {

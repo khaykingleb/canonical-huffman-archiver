@@ -5,14 +5,20 @@ Program that compresses and decompresses ASCII files based on [Huffman Coding](h
 ## Getting Started
 
 * In general, use the following to run the archiver program:
-   ```shell
-   make build && make test && make run
-   ```
 
+  ```shell
+  $ make build \
+    && make test \
+    && make run
+  $ cd build/src \
+    && ./archiver --compress test.huff ../../tests/test_1.txt ../../tests/test_2.txt \
+    && ./archiver --decompress test.huff
+  ```
 * For local development, you can attempt to use:
-   ```shell
-   make local-init && make conan-build
-   ```
+
+  ```shell
+  $ make local-init && make conan-build
+  ```
 
 ## Commands
 
@@ -30,7 +36,7 @@ The archive file has the following format:
 2. Data block for recovering the canonical code:
 
    1. `SYMBOLS_COUNT` values of 9 bits (alphabet characters in the order of canonical codes).
-   2. A list of `MAX_SYMBOL_CODE_SIZE` values of 9 bits, the `i`-th (when numbered from 0) element of which is the number of characters with the code length `i + 1`. `MAX_SYMBOL_CODE_SIZE` , the maximum code length in the current encoding, is not explicitly written to the file because it can be deduced from the available data.
+   2. A list of `MAX_SYMBOL_CODE_SIZE` values of 9 bits, the `i`-th (when numbered from 0) element of which is the number of characters with the code length `i + 1`. `MAX_SYMBOL_CODE_SIZE`, the maximum code length in the current encoding, is not explicitly written to the file because it can be deduced from the available data.
 3. The encoded file name.
 4. The encoded content of the file.
 5. The encoded service symbol `FILENAME_END`.
