@@ -9,14 +9,13 @@
 #include <cstddef>
 #include <cstdint>
 #include <cstdio>
-#include <iostream>
 #include <memory>
 #include <string>
 #include <unordered_map>
 #include <vector>
 
-HuffmanCoder::HuffmanCoder(FileReader& reader, FileWriter& writer)
-    : reader_(reader), writer_(writer)
+HuffmanCoder::HuffmanCoder(FileReader& reader, FileWriter& writer, bool is_last_file)
+    : reader_(reader), writer_(writer), is_last_file_(is_last_file)
 {
 }
 
@@ -109,6 +108,23 @@ void HuffmanCoder::Encode() const
             }
         }
     }
+
+    // Write the end of the file
+    std::string end_of_file_code = canonical_codes_for_lookup.at(FILENAME_END);
+    writer_.WriteHuffmanCode(end_of_file_code);
+
+    if (!is_last_file_)
+    {
+        // Write the start of the next file in the archive
+        std::string one_more_file_code = canonical_codes_for_lookup.at(ONE_MORE_FILE);
+        writer_.WriteHuffmanCode(one_more_file_code);
+    }
+    else
+    {
+        // Write the end of the archive
+        std::string archive_end_code = canonical_codes_for_lookup.at(ARCHIVE_END);
+        writer_.WriteHuffmanCode(archive_end_code);
+    }
 }
 
 HuffmanCodes HuffmanCoder::BuildCodes() const
@@ -152,34 +168,6 @@ CharacterFrequencies HuffmanCoder::GetCharacterFrequencies() const
     }
 
     return frequency_table;
-}
-
-std::shared_ptr<Node>
-HuffmanCoder::GetBinaryTrie(const CharacterFrequencies& character_frequencies) const
-{
-    // Build a min heap of nodes
-    MinHeap min_heap;
-    for (const auto& [character, frequency] : character_frequencies)
-    {
-        min_heap.emplace(
-            std::make_shared<Node>(Node { .character = character, .frequency = frequency }));
-    }
-
-    // Build the trie by merging nodes with the smallest frequencies
-    while (min_heap.size() > 1)
-    {
-        auto left = min_heap.top();
-        min_heap.pop();
-
-        auto right = min_heap.top();
-        min_heap.pop();
-
-        min_heap.emplace(std::make_shared<Node>(Node {
-            .frequency = left->frequency + right->frequency, .left = left, .right = right }));
-    }
-
-    // Return the root node
-    return min_heap.top();
 }
 
 void HuffmanCoder::GenerateHuffmanCodes(const std::shared_ptr<Node>& node,

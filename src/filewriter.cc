@@ -23,6 +23,11 @@ FileWriter::~FileWriter()
     }
 }
 
+void FileWriter::WriteCharacter(unsigned char character)
+{
+    file_.put(static_cast<char>(character));
+}
+
 void FileWriter::WriteHuffmanInt(uint64_t number, size_t num_bits)
 {
     std::vector<bool> bits(num_bits);

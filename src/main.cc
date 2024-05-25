@@ -38,6 +38,9 @@ int main(int argc, char* argv[])
     else if (vm.count("decompress"))
     {
         std::string archive_path = vm["decompress"].as<std::string>();
+
+        Archiver archiver(archive_path);
+        archiver.Decompress();
     }
     else
     {

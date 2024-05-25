@@ -8,7 +8,7 @@
 #include <unordered_map>
 
 /*
- * Special codes for the Huffman coding.
+ * Special control codes for the Huffman coding.
  */
 constexpr uint16_t FILENAME_END = 256;
 constexpr uint16_t ONE_MORE_FILE = 257;
@@ -38,7 +38,7 @@ public:
      * @param reader The file reader.
      * @param writer The file writer.
      */
-    HuffmanCoder(FileReader& reader, FileWriter& writer);
+    HuffmanCoder(FileReader& reader, FileWriter& writer, bool is_last_file = false);
 
     /*
      * Encode the file using Huffman coding algorithm.
@@ -58,14 +58,6 @@ protected:
     CharacterFrequencies GetCharacterFrequencies() const;
 
     /*
-     * Build the Huffman binary trie from the character frequencies using a priority queue
-     * with bottom-up approach.
-     * @param character_frequencies The character frequencies.
-     * @return The root of the Huffman binary trie.
-     */
-    std::shared_ptr<Node> GetBinaryTrie(const CharacterFrequencies& character_frequencies) const;
-
-    /*
      * Generate the Huffman codes.
      * @param node The current node in the Huffman binary trie
      * @param code The current code
@@ -77,6 +69,7 @@ protected:
 private:
     FileReader& reader_;
     FileWriter& writer_;
+    bool is_last_file_;
 };
 
 /*

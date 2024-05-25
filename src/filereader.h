@@ -52,7 +52,6 @@ public:
      */
     uint64_t ReadHuffmanInt(size_t num_bits = 9);
 
-protected:
     /**
      * Read a bit from the file.
      * @return The bit read from the file.

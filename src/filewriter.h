@@ -23,6 +23,12 @@ public:
     ~FileWriter();
 
     /**
+     * Write a character to the file.
+     * @param character The character to write.
+     */
+    void WriteCharacter(unsigned char character);
+
+    /**
      * Write an integer encoded with variable-length bit encoding.
      * @param number The integer to write.
      * @param num_bits The number of bits to write.
