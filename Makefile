@@ -29,11 +29,11 @@ build:  ## Build project
 .PHONY: build
 
 test:  ## Run tests
-	docker run -v $(PWD):/app -it canonical-huffman-archiver:0.1.0 bash -c "cd build/tests && ctest"
+	docker run -it canonical-huffman-archiver:0.1.0 bash -c "cd build/tests && ctest"
 .PHONY: test
 
 run:  ## Run bash in container
-	docker run -v $(PWD):/app -it canonical-huffman-archiver:$(VERSION) /bin/bash
+	docker run -it canonical-huffman-archiver:$(VERSION) /bin/bash
 .PHONY: run
 
 ##==================================================================================================
