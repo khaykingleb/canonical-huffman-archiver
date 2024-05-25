@@ -31,14 +31,14 @@ using MinHeap
 class BinaryTrie
 {
 public:
-    /**
+    /*
      * Constructor.
      * Build the trie from the character frequencies using a priority queue with bottom-up approach.
      * @param character_frequencies The character frequencies.
      */
     BinaryTrie(const CharacterFrequencies& character_frequencies);
 
-    /**
+    /*
      * Constructor.
      * Build the trie from the symbols and the Huffman codes.
      * @param symbols The symbols.
@@ -48,13 +48,13 @@ public:
     BinaryTrie(const Symbols& symbols,
                const std::vector<size_t>& symbols_counts_with_same_code_lengths);
 
-    /**
+    /*
      * Get the root of the trie.
      * @return The root of the trie.
      */
     std::shared_ptr<Node> GetRoot() const;
 
-    /**
+    /*
      * Get the character from the trie.
      * @param reader The file reader to read the character from the trie.
      * @return The character.

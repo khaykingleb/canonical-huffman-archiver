@@ -1,7 +1,6 @@
 #include "trie.h"
 
 #include <bitset>
-#include <cstdint>
 
 BinaryTrie::BinaryTrie(const CharacterFrequencies& character_frequencies)
 {
