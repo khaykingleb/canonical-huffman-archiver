@@ -9,7 +9,7 @@
 
 TEST(FileReaderTest, ConstructWithValidPath)
 {
-    ASSERT_NO_THROW(FileReader reader("test.txt"));
+    ASSERT_NO_THROW(FileReader reader("test_1.txt"));
 }
 
 TEST(FileReaderTest, ConstructWithInvalidPath)
@@ -19,19 +19,19 @@ TEST(FileReaderTest, ConstructWithInvalidPath)
 
 TEST(FileReaderTest, GetFileName)
 {
-    FileReader reader("test.txt");
-    ASSERT_EQ(reader.GetFileName(), "test.txt");
+    FileReader reader("test_1.txt");
+    ASSERT_EQ(reader.GetFileName(), "test_1.txt");
 }
 
 TEST(FileReaderTest, HasMoreCharacters)
 {
-    FileReader reader("test.txt");
+    FileReader reader("test_1.txt");
     ASSERT_TRUE(reader.HasMoreCharacters());
 }
 
 TEST(FileReaderTest, ReadCharacter)
 {
-    FileReader reader("test.txt");
+    FileReader reader("test_1.txt");
     ASSERT_EQ(reader.ReadCharacter().value(), 'N');
 }
 
@@ -69,7 +69,7 @@ TEST(FileTest, WriteHuffmanCode)
 
 TEST(FileReaderTest, ResetPositionToStart)
 {
-    FileReader reader("test.txt");
+    FileReader reader("test_1.txt");
 
     auto character = reader.ReadCharacter();
     ASSERT_EQ(character.value(), 'N');

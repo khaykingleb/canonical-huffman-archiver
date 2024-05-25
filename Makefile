@@ -9,11 +9,6 @@ DOCKER_BUILDKIT := 1
 ##==================================================================================================
 ##@ Repo initialization
 
-prerequisite: ## Install prerequisite tools
-ifeq ($(UNAME), Darwin)
-	brew install llvm@18
-endif
-
 deps:  ## Install repo deps
 	poetry install
 .PHONY: deps
@@ -23,7 +18,7 @@ pre-commit:  ## Install pre-commit
 	poetry run pre-commit install -t commit-msg
 .PHONY: pre-commit
 
-local-init: prerequisite deps pre-commit  ## Initialize local environment for development
+local-init: deps pre-commit  ## Initialize local environment for development
 .PHONY: local-init
 
 ##==================================================================================================
@@ -34,11 +29,11 @@ build:  ## Build project
 .PHONY: build
 
 test:  ## Run tests
-	docker run -v $(PWD):/app -it canonical-huffman-archiver:0.1.0 bash -c "cd build/tests && ctest"
+	docker run -it canonical-huffman-archiver:0.1.0 bash -c "cd build/tests && ctest"
 .PHONY: test
 
 run:  ## Run bash in container
-	docker run -v $(PWD):/app -it canonical-huffman-archiver:$(VERSION) /bin/bash
+	docker run -it canonical-huffman-archiver:$(VERSION) /bin/bash
 .PHONY: run
 
 ##==================================================================================================
@@ -83,7 +78,7 @@ audit-secrets-baseline:  ## Check updated .secrets.baseline file
 	git commit .secrets.baseline --no-verify -m "build(security): update secrets.baseline"
 .PHONY: audit-secrets-baseline
 
-clean: ## Delete junk files
+clean: ## Delete build files
 	rm -rf build .cache .venv CMakeUserPresets.json conanprofile.txt
 .PHONY: clean
 

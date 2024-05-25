@@ -22,7 +22,6 @@ RUN wget https://apt.llvm.org/llvm.sh --quiet \
 # Setup clang as default compiler
 RUN ln -s /usr/bin/clang-18 /usr/bin/clang
 ENV CC=clang
-
 RUN ln -s /usr/bin/clang++-18 /usr/bin/clang++
 ENV CXX=clang++
 

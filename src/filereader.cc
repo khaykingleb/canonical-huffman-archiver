@@ -1,10 +1,6 @@
 #include "filereader.h"
 
-#include <cstddef>
-#include <cstdint>
 #include <filesystem>
-#include <iostream>
-#include <sys/types.h>
 
 FileReader::FileReader(const std::string& file_path)
     : file_path_(file_path), file_(file_path_, std::ifstream::binary)

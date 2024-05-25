@@ -3,6 +3,8 @@ add_library(
     filereader.cc
     filewriter.cc
     huffman.cc
+    archiver.cc
+    trie.cc
 )
 find_package(Boost REQUIRED)
 target_link_libraries(
@@ -12,7 +14,6 @@ target_link_libraries(
 
 add_executable(
     ${PROJECT_NAME}
-    archiver.cc
     main.cc
 )
 target_link_libraries(

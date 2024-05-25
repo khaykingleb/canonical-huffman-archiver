@@ -1,9 +1,5 @@
 #include "filewriter.h"
 
-#include <cstddef>
-#include <cstdint>
-#include <vector>
-
 FileWriter::FileWriter(const std::string& file_path)
     : file_path_(file_path), file_(file_path, std::ofstream::binary)
 {
@@ -22,16 +18,28 @@ FileWriter::~FileWriter()
     }
 }
 
+void FileWriter::WriteCharacter(unsigned char character)
+{
+    file_.put(static_cast<char>(character));
+}
+
 void FileWriter::WriteHuffmanInt(uint64_t number, size_t num_bits)
 {
     std::vector<bool> bits(num_bits);
     for (size_t i = 0; i < num_bits; ++i)
     {
-        // Fill from the least significant bit to the most significant bit
-        bits[i] = (number >> i) & 1;
+        bits[i] = (number >> i) & 1; // fill from the LSB to the MSB
     }
-
     WriteBits(bits);
+}
+
+void FileWriter::WriteHuffmanCode(const std::string& huffman_code)
+{
+    // Reverse huffman code to write it from the least significant bit to the most significant bit
+    std::string reversed_huffman_code(huffman_code.rbegin(), huffman_code.rend());
+    uint64_t huffman_code_to_number = std::stoll(reversed_huffman_code, nullptr, 2);
+    size_t num_bits = reversed_huffman_code.size();
+    WriteHuffmanInt(huffman_code_to_number, num_bits);
 }
 
 void FileWriter::WriteBits(const std::vector<bool>& bits)

@@ -2,7 +2,11 @@ enable_testing()
 find_package(GTest REQUIRED)
 
 file(
-    COPY ${CMAKE_CURRENT_SOURCE_DIR}/test.txt
+    COPY ${CMAKE_CURRENT_SOURCE_DIR}/test_1.txt
+    DESTINATION ${CMAKE_CURRENT_BINARY_DIR}
+)
+file(
+    COPY ${CMAKE_CURRENT_SOURCE_DIR}/test_2.txt
     DESTINATION ${CMAKE_CURRENT_BINARY_DIR}
 )
 
@@ -26,5 +30,6 @@ function(add_gtest testname)
     )
 endfunction()
 
+add_gtest(test_archiver)
 add_gtest(test_file)
 add_gtest(test_huffman)
